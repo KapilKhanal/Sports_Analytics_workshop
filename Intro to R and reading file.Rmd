@@ -1,0 +1,91 @@
+---
+title: "Soccer Analytics"
+author: "Kapil Khanal"
+date: "3/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## - Data Analysis of events vs Data Analysis of entities
+ - How are event data collected? 
+ - How to work with event data in R
+
+
+### - Basics of R
+ - R is not like Java or C++ or Python. But programming skills transfers 
+ - It makes it easier to work with Data. 
+ 
+The primary data structure in R is a vector
+A vector is like an array/list in other programming language
+
+R is a functional langauge which means you work with functions not objects and methods. 
+
+Focus on data and functions to manipulate them 
+
+Data is usually in table format also called as dataframe
+Many data manipulation function also called as verbs are used 
+
+Analyzing your data and Plotting your data follows a grammatical format
+
+#### Example of data wrangling grammer
+First select the columns, then mutate or change or filter on them and then add some more relevant data and plot it
+
+R workflow consists of %>% also called as pipe. Data is like water which follows through data manipulation functions. At the end you collect data 
+
+top_n <-data %>% select() %>% mutate() %>% filter() %>% mutate() %>% select() %>% arrange() %>% count() %>% top_n()
+
+
+Main Data Structure is "data.frame"
+
+data.frame is basically a table with rows and columns. We mostly refer to columns..add columns, change columns..that is called column oriented workflow. One can do row oriented as well but is not common
+
+Above data is flowing through the functions
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+barca_real_data<-read.csv("https://raw.githubusercontent.com/KapilKhanal/Sports_Analytics_workshop/master/barca_vs_real.csv")
+```
+#### Example of Data following through code(functions)
+```{r}
+View(head(barca_real_data))
+```
+
+
+
+```{r}
+top_duration_by_possesion<-barca_real_data %>% group_by(possession,team.name) %>% 
+        summarise(maximum_possesion  = max(duration)) %>% 
+        top_n(10) %>%
+        arrange(desc(maximum_possesion))
+View(top_duration_by_possesion)
+```
+
+
+```{r}
+ggplot(data= top_duration_by_possesion,aes(y= maximum_possesion,x = team.name ,color = team.name)) +
+        geom_violin() + 
+        geom_jitter() + 
+        stat_boxplot(geom="errorbar", width=.5)+
+        theme_linedraw() 
+```
+```{r}
+top_duration_by_possesion %>% 
+        group_by(team.name) %>% 
+        summarise(mean_duration = mean(maximum_possesion)) 
+
+
+```
+Are they really significantly different?
+Nope.As conformed from the test below..
+```{r}
+
+t.test(maximum_possesion~team.name,data = top_duration_by_possesion)
+```
+
